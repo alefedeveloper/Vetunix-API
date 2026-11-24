@@ -1,4 +1,4 @@
-// Exemplo para leitura no primeiro exercício.
+// Código legado preservado para comparar com a versão organizada.
 export function marcarConsultaAntiga(tutor: string, telefone: string): string {
   if (tutor === "") {
     return "Erro";

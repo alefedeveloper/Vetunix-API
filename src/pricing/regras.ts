@@ -14,3 +14,8 @@ export const regraCirurgia: RegraDePreco = {
   tipoAtendimento: "CIRURGIA",
   calcular: () => 540
 };
+
+export const regraBanhoTosa: RegraDePreco = {
+  tipoAtendimento: "BANHO_TOSA",
+  calcular: () => 65
+};

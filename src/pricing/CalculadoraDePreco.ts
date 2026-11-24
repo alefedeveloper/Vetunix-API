@@ -1,7 +1,11 @@
 ﻿import type { NovaConsulta } from "../domain/Consulta";
 import type { RegraDePreco } from "./RegraDePreco";
 
-export class CalculadoraDePreco {
+export interface Precificador {
+  calcular(consulta: NovaConsulta): number;
+}
+
+export class CalculadoraDePreco implements Precificador {
   constructor(private readonly regras: readonly RegraDePreco[]) {}
 
   calcular(consulta: NovaConsulta): number {
