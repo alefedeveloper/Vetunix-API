@@ -50,9 +50,9 @@ Exemplo de corpo para `POST /consultas`. Use uma data futura em ISO 8601 com fus
 {
   "tutor": "Maria Silva",
   "telefone": "11912345678",
-  "animal": "Luna",
-  "tipoAtendimento": "CONSULTA",
-  "data": "2099-05-10T14:00:00-03:00",
+  "pet": "Luna",
+  "tipo": "CONSULTA",
+  "dataHora": "2099-05-10T14:00:00-03:00",
   "planoPetMais": true
 }
 ```
@@ -64,9 +64,9 @@ $url = 'http://localhost:3000/consultas'
 $dados = @{
   tutor = 'Maria Silva'
   telefone = '11912345678'
-  animal = 'Luna'
-  tipoAtendimento = 'CONSULTA'
-  data = [DateTime]::UtcNow.AddHours(1).ToString('o')
+  pet = 'Luna'
+  tipo = 'CONSULTA'
+  dataHora = [DateTime]::UtcNow.AddHours(1).ToString('o')
   planoPetMais = $true
 } | ConvertTo-Json
 $consulta = Invoke-RestMethod $url -Method Post -ContentType 'application/json' -Body $dados
@@ -75,8 +75,8 @@ Invoke-RestMethod "$url/$($consulta.id)"
 Invoke-RestMethod "$url/$($consulta.id)" -Method Delete
 ```
 
-O cadastro exige tutor com pelo menos três caracteres, telefone de 10 ou 11
-dígitos, animal preenchido, tipo válido e data futura. Se omitido, o booleano
+O cadastro exige `tutor` com pelo menos três caracteres, `telefone` de 10 ou
+11 dígitos, `pet` preenchido, `tipo` válido e `dataHora` futura. Se omitido, o booleano
 `planoPetMais` vale `false`. O servidor ignora os campos extras e gera o ID,
 o valor e o status `AGENDADA`. Uma falha ao enviar o aviso simulado desfaz o
 cadastro.
@@ -127,7 +127,8 @@ npm test
 npm run test:coverage
 ```
 
-Na validação final, passaram **39 testes em 3 suítes**. A cobertura foi de
+Na validação final, `npm run build`, `npm test` e `npm run test:coverage`
+concluíram com sucesso. Passaram **39 testes em 3 suítes**. A cobertura foi de
 94,50% das instruções, 91,52% das ramificações, 95,12% das funções e 94,21%
 das linhas. As pastas `pricing` e `facade` atingiram **100% de ramificações**
 cada.
@@ -135,6 +136,17 @@ cada.
 O Jest exige pelo menos 80% de cobertura de ramificações em cada uma das
 pastas `pricing` e `facade`. O relatório HTML fica em
 `coverage/lcov-report/index.html`.
+
+Os testes unitários cobrem os limites de horário e usam mocks do notificador
+e do SDK. Os testes de integração usam Supertest. Na verificação HTTP na
+porta 3000, o cadastro retornou 201, e a listagem, a busca e o cancelamento
+retornaram 200. Os cenários de erro retornaram 400, 404 e 409 conforme a
+tabela da API. A consulta Pet+ de R$ 96 teve taxa de R$ 24 ao ser cancelada
+com menos de duas horas de antecedência.
+
+Para aplicar TDD em uma mudança futura, escreva um teste que falhe, faça a
+menor implementação que o faça passar e depois refatore. Os resultados
+registrados acima verificam a versão atual do código.
 
 ## Git e participação da dupla
 
@@ -185,4 +197,6 @@ docker stop vetunix-teste
 
 Para validar as rotas de consultas no contêiner, use as mesmas requisições da
 seção API antes de executar `docker stop`. A validação do contêiner ficou
-pendente enquanto o Docker Engine estiver indisponível.
+pendente. Na verificação final, `docker info` falhou porque o pipe
+`dockerDesktopLinuxEngine` estava indisponível. A tag `v1.0` depende da
+validação do contêiner.
