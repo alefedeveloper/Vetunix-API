@@ -189,14 +189,20 @@ servidor pela entrada compilada `dist/index.js`, chamada por `npm start`. Com
 o motor Linux disponível e a porta 3000 livre, execute:
 
 ```powershell
+docker info
+docker run --rm hello-world
 docker build -t vetunix .
-docker run --rm -d --name vetunix-teste -p 3000:3000 vetunix
+docker run --rm -d --name vetunix-final -p 3000:3000 vetunix
 Invoke-RestMethod http://localhost:3000/status
-docker stop vetunix-teste
+Invoke-RestMethod http://localhost:3000/consultas
+docker stop vetunix-final
 ```
 
-Para validar as rotas de consultas no contêiner, use as mesmas requisições da
-seção API antes de executar `docker stop`. A validação do contêiner ficou
-pendente. Na verificação final, `docker info` falhou porque o pipe
-`dockerDesktopLinuxEngine` estava indisponível. A tag `v1.0` depende da
-validação do contêiner.
+Para cadastrar uma consulta no contêiner, execute o exemplo da seção API
+antes de rodar `docker stop`.
+
+A validação final passou no Docker Desktop com WSL 2 e Docker Engine 29.9.3.
+`docker info`, `hello-world` e a construção da imagem concluíram com sucesso.
+O contêiner respondeu 200 em `GET /status`, 201 em `POST /consultas` para
+uma consulta Pet+ de R$ 96 e 200 em `GET /consultas` com a consulta cadastrada.
+O contêiner de teste foi encerrado e removido pelo parâmetro `--rm`.
