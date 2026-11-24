@@ -36,7 +36,7 @@ export class ClinicaFacade {
     };
     this.repositorio.salvar(consulta);
     try {
-      this.notificador.enviar(consulta.telefone, "Consulta agendada para " + consulta.animal);
+      this.notificador.enviar(consulta.telefone, "Consulta agendada para " + consulta.pet);
     } catch (erro) {
       this.repositorio.remover(consulta.id);
       throw erro;
@@ -62,7 +62,7 @@ export class ClinicaFacade {
     }
 
     const taxaCancelamento = this.calculadoraTaxa.calcular(
-      consulta.valor, consulta.data, agora, consulta.planoPetMais
+      consulta.valor, consulta.dataHora, agora, consulta.planoPetMais
     );
     const cancelada: Consulta = { ...consulta, status: "CANCELADA", taxaCancelamento };
     this.repositorio.salvar(cancelada);

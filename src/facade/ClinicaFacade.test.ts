@@ -11,9 +11,9 @@ const agora = new Date("2040-05-10T12:00:00Z");
 const dados: NovaConsulta = {
   tutor: "Maria",
   telefone: "11912345678",
-  animal: "Luna",
-  tipoAtendimento: "CONSULTA",
-  data: new Date("2040-05-10T13:00:00Z"),
+  pet: "Luna",
+  tipo: "CONSULTA",
+  dataHora: new Date("2040-05-10T13:00:00Z"),
   planoPetMais: false
 };
 
@@ -71,7 +71,7 @@ describe("ClinicaFacade", () => {
 
   it("lança erro quando o tipo não tem regra cadastrada", () => {
     const { facade, enviar } = prepararFacade();
-    expect(() => facade.cadastrar({ ...dados, tipoAtendimento: "VACINA" }, agora))
+    expect(() => facade.cadastrar({ ...dados, tipo: "VACINA" }, agora))
       .toThrow("Regra de preço não encontrada");
     expect(enviar).not.toHaveBeenCalled();
   });

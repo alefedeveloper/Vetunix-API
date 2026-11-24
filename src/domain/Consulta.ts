@@ -5,9 +5,9 @@ export type { TipoAtendimento } from "./TipoAtendimento";
 export interface NovaConsulta {
   tutor: string;
   telefone: string;
-  animal: string;
-  tipoAtendimento: TipoAtendimento;
-  data: Date;
+  pet: string;
+  tipo: TipoAtendimento;
+  dataHora: Date;
   planoPetMais: boolean;
 }
 

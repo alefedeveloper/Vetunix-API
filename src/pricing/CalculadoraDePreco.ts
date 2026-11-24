@@ -9,7 +9,7 @@ export class CalculadoraDePreco implements Precificador {
   constructor(private readonly regras: readonly RegraDePreco[]) {}
 
   calcular(consulta: NovaConsulta): number {
-    const regra = this.regras.find((regra) => regra.tipoAtendimento === consulta.tipoAtendimento);
+    const regra = this.regras.find((regra) => regra.tipoAtendimento === consulta.tipo);
     if (!regra) {
       throw new Error("Regra de preço não encontrada");
     }
