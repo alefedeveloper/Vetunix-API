@@ -1,7 +1,7 @@
-import aplicacao from "./app";
+import { montarServidor } from "./montagem";
 
 const porta = Number(process.env.PORT) || 3000;
 
-aplicacao.listen(porta, () => {
+montarServidor().listen(porta, () => {
   console.log(`API Vetunix disponível na porta ${porta}`);
 });
