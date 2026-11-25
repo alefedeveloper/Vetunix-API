@@ -49,4 +49,10 @@ Conforme informado pelo estudante, o professor autorizou o uso de IA. O Codex au
 - Curso: Ciência da Computação
 - Disciplina: Engenharia de Software II
 - Professor: Ryan Freitas
+- ## Limitações da versão atual
+
+- Os dados são armazenados em memória.
+- Os agendamentos são perdidos ao reiniciar a aplicação.
+- A integração com o serviço de notificações é simulada.
+
 
