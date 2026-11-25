@@ -2,6 +2,8 @@
 
 export { TipoAtendimento } from "./TipoAtendimento";
 
+export type StatusConsulta = "AGENDADA" | "CANCELADA";
+
 export interface NovaConsulta {
   tutor: string;
   telefone: string;
@@ -14,6 +16,6 @@ export interface NovaConsulta {
 export interface Consulta extends NovaConsulta {
   id: number;
   valor: number;
-  status: "AGENDADA" | "CANCELADA";
+  status: StatusConsulta;
   taxaCancelamento?: number;
 }

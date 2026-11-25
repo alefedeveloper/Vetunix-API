@@ -1,6 +1,6 @@
-import type { NovaConsulta, TipoAtendimento } from "../domain/Consulta";
+﻿import type { TipoAtendimento } from "../domain/TipoAtendimento";
 
 export interface RegraDePreco {
-  tipoAtendimento: TipoAtendimento;
-  calcular(consulta: NovaConsulta): number;
+  readonly tipo: TipoAtendimento;
+  calcular(): number;
 }

@@ -1,9 +1,8 @@
-import type { Consulta } from "../domain/Consulta";
+﻿import type { Consulta } from "../domain/Consulta";
 
 export interface IRepositorioConsultas {
-  criar(consulta: Omit<Consulta, "id">): Consulta;
-  salvar(consulta: Consulta): void;
-  listar(): Consulta[];
+  salvar(consulta: Omit<Consulta, "id">): Consulta;
   buscarPorId(id: number): Consulta | undefined;
-  remover(id: number): void;
+  atualizar(consulta: Consulta): void;
+  listar(): Consulta[];
 }

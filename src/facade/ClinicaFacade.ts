@@ -1,9 +1,11 @@
 ﻿import type { Consulta } from "../domain/Consulta";
 import { validarNovaConsulta } from "../domain/validarNovaConsulta";
 import type { INotificador } from "../notifications/INotificador";
-import type { Precificador } from "../pricing/CalculadoraDePreco";
-import type { CalculadoraDeTaxaCancelamento } from "../pricing/CalculadoraDeTaxaCancelamento";
+import type { CalculadoraDePreco } from "../pricing/CalculadoraDePreco";
+import { CalculadoraDeTaxaCancelamento } from "../pricing/CalculadoraDeTaxaCancelamento";
 import type { IRepositorioConsultas } from "../repositories/IRepositorioConsultas";
+
+const calculadoraTaxaPadrao = new CalculadoraDeTaxaCancelamento();
 
 export class ConsultaInexistente extends Error {
   constructor() {
@@ -20,24 +22,25 @@ export class ConsultaJaCancelada extends Error {
 export class ClinicaFacade {
   constructor(
     private readonly repositorio: IRepositorioConsultas,
-    private readonly calculadora: Precificador,
+    private readonly calculadora: CalculadoraDePreco,
     private readonly notificador: INotificador,
-    private readonly calculadoraTaxa: CalculadoraDeTaxaCancelamento
+    private readonly calculadoraTaxa = calculadoraTaxaPadrao
   ) {}
 
   agendar(entrada: unknown, agora = new Date()): Consulta {
     const dados = validarNovaConsulta(entrada, agora);
-    const consulta = this.repositorio.criar({
+    const consulta = this.repositorio.salvar({
       ...dados,
-      valor: this.calculadora.calcular(dados),
+      valor: this.calculadora.calcular(dados.tipo, dados.planoPetMais),
       status: "AGENDADA"
     });
-    try {
-      this.notificador.enviar(consulta.telefone, "Consulta agendada para " + consulta.pet);
-    } catch (erro) {
-      this.repositorio.remover(consulta.id);
-      throw erro;
-    }
+    const data = consulta.dataHora.toLocaleDateString("pt-BR");
+    const hora = consulta.dataHora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    const valor = consulta.valor.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    this.notificador.enviar(
+      consulta.telefone,
+      `Olá ${consulta.tutor}! A consulta do ${consulta.pet} foi agendada para ${data} ${hora}. Valor: R$ ${valor}`
+    );
     return consulta;
   }
 
@@ -62,7 +65,7 @@ export class ClinicaFacade {
       consulta.valor, consulta.dataHora, agora, consulta.planoPetMais
     );
     const cancelada: Consulta = { ...consulta, status: "CANCELADA", taxaCancelamento };
-    this.repositorio.salvar(cancelada);
+    this.repositorio.atualizar(cancelada);
     return cancelada;
   }
 }

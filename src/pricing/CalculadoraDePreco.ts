@@ -1,18 +1,15 @@
-﻿import type { NovaConsulta } from "../domain/Consulta";
+﻿import type { TipoAtendimento } from "../domain/TipoAtendimento";
+import { DescontoPlanoPet } from "./DescontoPlanoPet";
 import type { RegraDePreco } from "./RegraDePreco";
 
-export interface Precificador {
-  calcular(consulta: NovaConsulta): number;
-}
-
-export class CalculadoraDePreco implements Precificador {
+export class CalculadoraDePreco {
   constructor(private readonly regras: readonly RegraDePreco[]) {}
 
-  calcular(consulta: NovaConsulta): number {
-    const regra = this.regras.find((regra) => regra.tipoAtendimento === consulta.tipo);
+  calcular(tipo: TipoAtendimento, planoPetMais = false): number {
+    const regra = this.regras.find((regra) => regra.tipo === tipo);
     if (!regra) {
-      throw new Error("Regra de preço não encontrada");
+      throw new Error(`Tipo de atendimento não suportado: ${tipo}`);
     }
-    return regra.calcular(consulta);
+    return planoPetMais ? new DescontoPlanoPet(regra).calcular() : regra.calcular();
   }
 }

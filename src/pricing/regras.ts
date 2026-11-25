@@ -2,7 +2,7 @@
 import type { RegraDePreco } from "./RegraDePreco";
 
 export class PrecoConsulta implements RegraDePreco {
-  readonly tipoAtendimento = TipoAtendimento.CONSULTA;
+  readonly tipo = TipoAtendimento.CONSULTA;
 
   calcular(): number {
     return 120;
@@ -10,7 +10,7 @@ export class PrecoConsulta implements RegraDePreco {
 }
 
 export class PrecoVacina implements RegraDePreco {
-  readonly tipoAtendimento = TipoAtendimento.VACINA;
+  readonly tipo = TipoAtendimento.VACINA;
 
   calcular(): number {
     return 80;
@@ -18,7 +18,7 @@ export class PrecoVacina implements RegraDePreco {
 }
 
 export class PrecoCirurgia implements RegraDePreco {
-  readonly tipoAtendimento = TipoAtendimento.CIRURGIA;
+  readonly tipo = TipoAtendimento.CIRURGIA;
 
   calcular(): number {
     return 540;
@@ -26,7 +26,7 @@ export class PrecoCirurgia implements RegraDePreco {
 }
 
 export class PrecoBanhoTosa implements RegraDePreco {
-  readonly tipoAtendimento = TipoAtendimento.BANHO_TOSA;
+  readonly tipo = TipoAtendimento.BANHO_TOSA;
 
   calcular(): number {
     return 65;

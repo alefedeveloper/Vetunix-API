@@ -12,7 +12,7 @@ function lerData(entrada: unknown): Date | undefined {
     return new Date(entrada);
   }
   if (typeof entrada !== "string" ||
-      !/^\d{4}-\d{2}-\d{2}T(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z|[+-]\d{2}:\d{2})$/.test(entrada)) {
+      !/^\d{4}-\d{2}-\d{2}T(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z|[+-]\d{2}:\d{2})?$/.test(entrada)) {
     return undefined;
   }
 

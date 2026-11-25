@@ -48,6 +48,14 @@ describe("API Vetunix", () => {
     expect(resposta.body).not.toHaveProperty("extra");
   });
 
+  it("aceita a data ISO sem fuso do roteiro como horário local", async () => {
+    const ano = new Date().getFullYear() + 1;
+    const dataHora = `${ano}-01-10T14:00:00`;
+    const resposta = await api.post("/consultas").send({ ...dadosValidos(), dataHora }).expect(201);
+
+    expect(resposta.body.dataHora).toBe(new Date(ano, 0, 10, 14).toISOString());
+  });
+
   it.each([
     ["telefone", "11A12345678", "Telefone deve ter 10 ou 11 dígitos"],
     ["tipo", "EXAME", "Tipo de atendimento inválido"],

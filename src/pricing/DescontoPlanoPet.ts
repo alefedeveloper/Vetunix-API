@@ -1,11 +1,13 @@
-﻿import type { NovaConsulta } from "../domain/Consulta";
-import type { Precificador } from "./CalculadoraDePreco";
+﻿import type { RegraDePreco } from "./RegraDePreco";
 
-export class DescontoPlanoPet implements Precificador {
-  constructor(private readonly calculadora: Precificador) {}
+export class DescontoPlanoPet implements RegraDePreco {
+  constructor(private readonly regraOriginal: RegraDePreco) {}
 
-  calcular(consulta: NovaConsulta): number {
-    const valor = this.calculadora.calcular(consulta);
-    return consulta.planoPetMais ? valor * 0.8 : valor;
+  get tipo() {
+    return this.regraOriginal.tipo;
+  }
+
+  calcular(): number {
+    return Math.round(this.regraOriginal.calcular() * 0.8 * 100) / 100;
   }
 }
