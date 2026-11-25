@@ -39,3 +39,14 @@ O relatório HTML de cobertura fica em `coverage/lcov-report/index.html`.
 ## Declaração acadêmica
 
 Conforme informado pelo estudante, o professor autorizou o uso de IA. O Codex auxiliou na implementação, nos testes e nas verificações.
+## Integrantes
+
+- Álefe Lucas Mendes Neves
+- Erik Jason Gomes Miranda
+
+## Informações acadêmicas
+
+- Curso: Ciência da Computação
+- Disciplina: Engenharia de Software II
+- Professor: Ryan Freitas
+
