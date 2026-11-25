@@ -4,6 +4,11 @@ API de agendamento veterinário inspirada no AgendaVet. Cadastra, lista, busca e
 cancela consultas, calcula preços e taxas e simula avisos por WhatsApp. As
 consultas ficam em memória e são descartadas ao reiniciar o servidor.
 
+**Integrantes**
+
+- Álefe Lucas Mendes Neves
+- Erik Jason Gomes Miranda
+
 ## Tecnologias e estrutura
 
 Node.js 22 ou superior, TypeScript, Express, Jest, ts-jest e Supertest. O Docker
@@ -42,7 +47,7 @@ Para rodar a versão compilada, use `npm run build` e depois `npm start`.
 | `POST /consultas` | 201 com a consulta e o ID gerado | 400 com a lista `erros` |
 | `GET /consultas` | 200 com a lista de agendadas e canceladas | |
 | `GET /consultas/:id` | 200 com a consulta | 400 para ID inválido, 404 para ID inexistente |
-| `DELETE /consultas/:id` | 200 com a consulta cancelada e `taxaCancelamento` em reais | 404 para consulta inexistente, 409 se já cancelada |
+| `DELETE /consultas/:id` | 200 com a consulta cancelada e `taxaCancelamento` em reais | 400 para ID inválido, 404 para consulta inexistente, 409 se já cancelada |
 
 Exemplo de corpo para `POST /consultas`. Use uma data futura em ISO 8601 com fuso:
 
@@ -78,8 +83,31 @@ Invoke-RestMethod "$url/$($consulta.id)" -Method Delete
 O cadastro exige `tutor` com pelo menos três caracteres, `telefone` de 10 ou
 11 dígitos, `pet` preenchido, `tipo` válido e `dataHora` futura. Se omitido, o booleano
 `planoPetMais` vale `false`. O servidor ignora os campos extras e gera o ID,
-o valor e o status `AGENDADA`. Uma falha ao enviar o aviso simulado desfaz o
-cadastro.
+o valor e o status `AGENDADA`. O repositório gera IDs inteiros sequenciais a
+partir de 1. Uma falha ao enviar o aviso simulado desfaz o cadastro.
+
+### Demonstração da Parte 1
+
+Com o servidor iniciado, execute três agendamentos de exemplo e confira os
+valores de R$ 120, R$ 64 e R$ 540. Em uma instância recém-iniciada, os IDs
+serão 1, 2 e 3.
+
+```powershell
+$url = 'http://localhost:3000/consultas'
+$exemplos = @(
+    @{ pet = 'Luna'; tipo = 'CONSULTA'; planoPetMais = $false }
+    @{ pet = 'Toby'; tipo = 'VACINA'; planoPetMais = $true }
+    @{ pet = 'Nina'; tipo = 'CIRURGIA'; planoPetMais = $false }
+)
+$exemplos | ForEach-Object {
+    $dados = $_ + @{
+        tutor = 'Maria Silva'
+        telefone = '11912345678'
+        dataHora = [DateTime]::UtcNow.AddDays(2).ToString('o')
+    }
+    Invoke-RestMethod $url -Method Post -ContentType 'application/json' -Body ($dados | ConvertTo-Json)
+} | Select-Object id, pet, tipo, planoPetMais, valor
+```
 
 ### Preços e cancelamento
 
@@ -119,6 +147,10 @@ do SDK simulado. O **Decorator** `DescontoPlanoPet` chama a calculadora e
 aplica o desconto. A **Facade** `ClinicaFacade` reúne as operações usadas
 pelas rotas e delega o trabalho às dependências.
 
+Os documentos originais do professor não estavam disponíveis nesta revisão.
+A demonstração usa dados de exemplo. A conferência literal dos contratos de
+preço, repositório e Decorator, do legado e do SDK depende desses documentos.
+
 ## Testes e cobertura
 
 ```powershell
@@ -129,7 +161,7 @@ npm run test:coverage
 
 Na validação final, `npm run build`, `npm test` e `npm run test:coverage`
 concluíram com sucesso. Passaram **39 testes em 3 suítes**. A cobertura foi de
-94,50% das instruções, 91,52% das ramificações, 95,12% das funções e 94,21%
+95,00% das instruções, 92,53% das ramificações, 95,91% das funções e 94,73%
 das linhas. As pastas `pricing` e `facade` atingiram **100% de ramificações**
 cada.
 
@@ -206,3 +238,8 @@ A validação final passou no Docker Desktop com WSL 2 e Docker Engine 29.9.3.
 O contêiner respondeu 200 em `GET /status`, 201 em `POST /consultas` para
 uma consulta Pet+ de R$ 96 e 200 em `GET /consultas` com a consulta cadastrada.
 O contêiner de teste foi encerrado e removido pelo parâmetro `--rm`.
+
+Após a revisão dos IDs, a imagem foi reconstruída no Docker Engine 29.9.3.
+A demonstração da Parte 1 retornou 201 para os três agendamentos, com IDs
+numéricos 1, 2 e 3. Status, listagem, busca por ID e cancelamento retornaram
+200. O contêiner da revisão também foi encerrado e removido.
