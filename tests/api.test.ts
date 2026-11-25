@@ -1,5 +1,4 @@
-﻿import { randomUUID } from "node:crypto";
-import request from "supertest";
+﻿import request from "supertest";
 import { criarApp } from "../src/app";
 import { montarFacade } from "../src/montagem";
 
@@ -31,7 +30,9 @@ describe("API Vetunix", () => {
     const dados = dadosValidos();
     const resposta = await api.post("/consultas").send(dados).expect(201);
     expect(resposta.body).toMatchObject({ ...dados, planoPetMais: false, status: "AGENDADA" });
-    expect(resposta.body.id).toEqual(expect.any(String));
+    expect(resposta.body.id).toBe(1);
+    const proxima = await api.post("/consultas").send({ ...dados, id: 999 }).expect(201);
+    expect(proxima.body.id).toBe(2);
   });
 
   it.each([
@@ -86,11 +87,14 @@ describe("API Vetunix", () => {
   });
 
   it("rejeita um ID malformado na busca", async () => {
-    await api.get("/consultas/abc").expect(400, { mensagem: "ID inválido" });
+    for (const id of ["abc", "0", "-1", "1.5", "1e2", "9007199254740992"]) {
+      await api.get("/consultas/" + id).expect(400, { mensagem: "ID inválido" });
+      await api.delete("/consultas/" + id).expect(400, { mensagem: "ID inválido" });
+    }
   });
 
   it("retorna 404 ao buscar ou cancelar um ID inexistente", async () => {
-    const caminho = "/consultas/" + randomUUID();
+    const caminho = "/consultas/999";
     await api.get(caminho).expect(404);
     await api.delete(caminho).expect(404);
   });

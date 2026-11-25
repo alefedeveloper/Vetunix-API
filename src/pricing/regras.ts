@@ -1,21 +1,34 @@
-﻿import type { RegraDePreco } from "./RegraDePreco";
+﻿import { TipoAtendimento } from "../domain/TipoAtendimento";
+import type { RegraDePreco } from "./RegraDePreco";
 
-export const regraConsulta: RegraDePreco = {
-  tipoAtendimento: "CONSULTA",
-  calcular: () => 120
-};
+export class PrecoConsulta implements RegraDePreco {
+  readonly tipoAtendimento = TipoAtendimento.CONSULTA;
 
-export const regraVacina: RegraDePreco = {
-  tipoAtendimento: "VACINA",
-  calcular: () => 80
-};
+  calcular(): number {
+    return 120;
+  }
+}
 
-export const regraCirurgia: RegraDePreco = {
-  tipoAtendimento: "CIRURGIA",
-  calcular: () => 540
-};
+export class PrecoVacina implements RegraDePreco {
+  readonly tipoAtendimento = TipoAtendimento.VACINA;
 
-export const regraBanhoTosa: RegraDePreco = {
-  tipoAtendimento: "BANHO_TOSA",
-  calcular: () => 65
-};
+  calcular(): number {
+    return 80;
+  }
+}
+
+export class PrecoCirurgia implements RegraDePreco {
+  readonly tipoAtendimento = TipoAtendimento.CIRURGIA;
+
+  calcular(): number {
+    return 540;
+  }
+}
+
+export class PrecoBanhoTosa implements RegraDePreco {
+  readonly tipoAtendimento = TipoAtendimento.BANHO_TOSA;
+
+  calcular(): number {
+    return 65;
+  }
+}

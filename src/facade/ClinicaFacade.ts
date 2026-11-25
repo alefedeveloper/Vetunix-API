@@ -1,5 +1,4 @@
-﻿import { randomUUID } from "node:crypto";
-import type { Consulta } from "../domain/Consulta";
+﻿import type { Consulta } from "../domain/Consulta";
 import { validarNovaConsulta } from "../domain/validarNovaConsulta";
 import type { INotificador } from "../notifications/INotificador";
 import type { Precificador } from "../pricing/CalculadoraDePreco";
@@ -26,15 +25,13 @@ export class ClinicaFacade {
     private readonly calculadoraTaxa: CalculadoraDeTaxaCancelamento
   ) {}
 
-  cadastrar(entrada: unknown, agora = new Date()): Consulta {
+  agendar(entrada: unknown, agora = new Date()): Consulta {
     const dados = validarNovaConsulta(entrada, agora);
-    const consulta: Consulta = {
+    const consulta = this.repositorio.criar({
       ...dados,
-      id: randomUUID(),
       valor: this.calculadora.calcular(dados),
       status: "AGENDADA"
-    };
-    this.repositorio.salvar(consulta);
+    });
     try {
       this.notificador.enviar(consulta.telefone, "Consulta agendada para " + consulta.pet);
     } catch (erro) {
@@ -48,11 +45,11 @@ export class ClinicaFacade {
     return this.repositorio.listar();
   }
 
-  buscarPorId(id: string): Consulta | undefined {
+  buscarPorId(id: number): Consulta | undefined {
     return this.repositorio.buscarPorId(id);
   }
 
-  cancelar(id: string, agora = new Date()): Consulta {
+  cancelar(id: number, agora = new Date()): Consulta {
     const consulta = this.buscarPorId(id);
     if (!consulta) {
       throw new ConsultaInexistente();

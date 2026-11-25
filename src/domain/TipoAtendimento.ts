@@ -1,7 +1,10 @@
-﻿export const tiposAtendimento = ["CONSULTA", "VACINA", "CIRURGIA", "BANHO_TOSA"] as const;
-
-export type TipoAtendimento = (typeof tiposAtendimento)[number];
+﻿export enum TipoAtendimento {
+  CONSULTA = "CONSULTA",
+  VACINA = "VACINA",
+  CIRURGIA = "CIRURGIA",
+  BANHO_TOSA = "BANHO_TOSA"
+}
 
 export function tipoAtendimentoValido(tipo: unknown): tipo is TipoAtendimento {
-  return tiposAtendimento.some((tipoPermitido) => tipoPermitido === tipo);
+  return Object.values(TipoAtendimento).some((tipoPermitido) => tipoPermitido === tipo);
 }

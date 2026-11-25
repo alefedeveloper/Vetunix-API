@@ -1,6 +1,6 @@
 ﻿import type { TipoAtendimento } from "./TipoAtendimento";
 
-export type { TipoAtendimento } from "./TipoAtendimento";
+export { TipoAtendimento } from "./TipoAtendimento";
 
 export interface NovaConsulta {
   tutor: string;
@@ -12,7 +12,7 @@ export interface NovaConsulta {
 }
 
 export interface Consulta extends NovaConsulta {
-  id: string;
+  id: number;
   valor: number;
   status: "AGENDADA" | "CANCELADA";
   taxaCancelamento?: number;

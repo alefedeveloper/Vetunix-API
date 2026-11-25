@@ -4,6 +4,11 @@ import { ErroValidacao } from "./domain/validarNovaConsulta";
 import { ConsultaInexistente, ConsultaJaCancelada } from "./facade/ClinicaFacade";
 import type { ClinicaFacade } from "./facade/ClinicaFacade";
 
+function lerId(valor: string): number | undefined {
+  const id = Number(valor);
+  return /^\d+$/.test(valor) && Number.isSafeInteger(id) && id > 0 ? id : undefined;
+}
+
 const tratarErro: ErrorRequestHandler = (erro, _requisicao, resposta, _proximo) => {
   if (erro instanceof ErroValidacao) {
     resposta.status(400).json({ erros: erro.erros });
@@ -27,7 +32,7 @@ export function criarApp(facade: ClinicaFacade) {
   });
 
   aplicacao.post("/consultas", (requisicao, resposta) => {
-    resposta.status(201).json(facade.cadastrar(requisicao.body));
+    resposta.status(201).json(facade.agendar(requisicao.body));
   });
 
   aplicacao.get("/consultas", (_requisicao, resposta) => {
@@ -35,13 +40,12 @@ export function criarApp(facade: ClinicaFacade) {
   });
 
   aplicacao.get("/consultas/:id", (requisicao, resposta) => {
-    const { id } = requisicao.params;
-    const idValido = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    if (!idValido.test(id)) {
+    const id = lerId(requisicao.params.id);
+    if (id === undefined) {
       resposta.status(400).json({ mensagem: "ID inválido" });
       return;
     }
-    const consulta = facade.buscarPorId(id.toLowerCase());
+    const consulta = facade.buscarPorId(id);
     if (!consulta) {
       throw new ConsultaInexistente();
     }
@@ -49,7 +53,12 @@ export function criarApp(facade: ClinicaFacade) {
   });
 
   aplicacao.delete("/consultas/:id", (requisicao, resposta) => {
-    const cancelada = facade.cancelar(requisicao.params.id.toLowerCase());
+    const id = lerId(requisicao.params.id);
+    if (id === undefined) {
+      resposta.status(400).json({ mensagem: "ID inválido" });
+      return;
+    }
+    const cancelada = facade.cancelar(id);
     resposta.status(200).json(cancelada);
   });
 

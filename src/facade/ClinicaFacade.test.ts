@@ -1,9 +1,9 @@
-﻿import type { NovaConsulta } from "../domain/Consulta";
+﻿import { TipoAtendimento, type NovaConsulta } from "../domain/Consulta";
 import { ZapAdapter } from "../notifications/ZapAdapter";
 import { CalculadoraDePreco } from "../pricing/CalculadoraDePreco";
 import { CalculadoraDeTaxaCancelamento } from "../pricing/CalculadoraDeTaxaCancelamento";
 import { DescontoPlanoPet } from "../pricing/DescontoPlanoPet";
-import { regraConsulta } from "../pricing/regras";
+import { PrecoConsulta } from "../pricing/regras";
 import { RepositorioEmMemoria } from "../repositories/RepositorioEmMemoria";
 import { ClinicaFacade } from "./ClinicaFacade";
 
@@ -12,14 +12,14 @@ const dados: NovaConsulta = {
   tutor: "Maria",
   telefone: "11912345678",
   pet: "Luna",
-  tipo: "CONSULTA",
+  tipo: TipoAtendimento.CONSULTA,
   dataHora: new Date("2040-05-10T13:00:00Z"),
   planoPetMais: false
 };
 
 function prepararFacade() {
   const enviar = jest.fn();
-  const precificador = new DescontoPlanoPet(new CalculadoraDePreco([regraConsulta]));
+  const precificador = new DescontoPlanoPet(new CalculadoraDePreco([new PrecoConsulta()]));
   const facade = new ClinicaFacade(
     new RepositorioEmMemoria(), precificador, { enviar }, new CalculadoraDeTaxaCancelamento()
   );
@@ -29,7 +29,7 @@ function prepararFacade() {
 describe("ClinicaFacade", () => {
   it("persiste a consulta e envia uma única notificação", () => {
     const { facade, enviar } = prepararFacade();
-    const consulta = facade.cadastrar(dados, agora);
+    const consulta = facade.agendar(dados, agora);
 
     expect(facade.buscarPorId(consulta.id)).toEqual(consulta);
     expect(enviar).toHaveBeenCalledTimes(1);
@@ -38,24 +38,24 @@ describe("ClinicaFacade", () => {
 
   it("não registra nem notifica dados inválidos", () => {
     const { facade, enviar } = prepararFacade();
-    expect(() => facade.cadastrar({ ...dados, tutor: "Li" }, agora)).toThrow("Dados da consulta inválidos");
+    expect(() => facade.agendar({ ...dados, tutor: "Li" }, agora)).toThrow("Dados da consulta inválidos");
     expect(enviar).not.toHaveBeenCalled();
     expect(facade.listar()).toEqual([]);
   });
 
   it("calcula R$ 96 para consulta com Pet+", () => {
     const { facade } = prepararFacade();
-    expect(facade.cadastrar({ ...dados, planoPetMais: true }, agora).valor).toBe(96);
+    expect(facade.agendar({ ...dados, planoPetMais: true }, agora).valor).toBe(96);
   });
 
   it("lança erro ao cancelar uma consulta inexistente", () => {
     const { facade } = prepararFacade();
-    expect(() => facade.cancelar("ausente", agora)).toThrow("Consulta inexistente");
+    expect(() => facade.cancelar(999, agora)).toThrow("Consulta inexistente");
   });
 
   it("guarda o status cancelado e cobra a taxa sobre o valor registrado", () => {
     const { facade } = prepararFacade();
-    const consulta = facade.cadastrar({ ...dados, planoPetMais: true }, agora);
+    const consulta = facade.agendar({ ...dados, planoPetMais: true }, agora);
     const cancelada = facade.cancelar(consulta.id, agora);
     expect(cancelada).toMatchObject({ status: "CANCELADA", taxaCancelamento: 24 });
     expect(facade.buscarPorId(consulta.id)).toEqual(cancelada);
@@ -65,13 +65,13 @@ describe("ClinicaFacade", () => {
   it("desfaz o cadastro quando o notificador falha", () => {
     const { facade, enviar } = prepararFacade();
     enviar.mockImplementation(() => { throw new Error("Falha ao notificar"); });
-    expect(() => facade.cadastrar(dados, agora)).toThrow("Falha ao notificar");
+    expect(() => facade.agendar(dados, agora)).toThrow("Falha ao notificar");
     expect(facade.listar()).toEqual([]);
   });
 
   it("lança erro quando o tipo não tem regra cadastrada", () => {
     const { facade, enviar } = prepararFacade();
-    expect(() => facade.cadastrar({ ...dados, tipo: "VACINA" }, agora))
+    expect(() => facade.agendar({ ...dados, tipo: "VACINA" }, agora))
       .toThrow("Regra de preço não encontrada");
     expect(enviar).not.toHaveBeenCalled();
   });
