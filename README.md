@@ -33,32 +33,16 @@ A API escuta na porta 3000. Para executar a compilação, use
 | `DELETE /consultas/:id` | 200 com a consulta cancelada e a taxa | 400 para ID inválido, 404 para ID ausente, 409 se já cancelada |
 
 O repositório gera IDs inteiros sequenciais. Envie `tutor`, `telefone`,
-`pet`, `tipo`, `dataHora` futura em ISO 8601 com fuso e, opcionalmente,
-`planoPetMais`. O plano tem valor padrão `false`.
+`pet`, `tipo`, `dataHora` futura em ISO 8601 e, opcionalmente,
+`planoPetMais` (padrão `false`). Uma data como `2030-01-10T14:00:00` usa o
+horário local do servidor. Também são aceitos `Z` e deslocamentos explícitos.
 
 ## Demonstração da Parte 1
 
-Com o servidor iniciado, execute:
-
-```powershell
-$url = 'http://localhost:3000/consultas'
-$exemplos = @(
-    @{ pet = 'Luna'; tipo = 'CONSULTA'; planoPetMais = $false }
-    @{ pet = 'Toby'; tipo = 'VACINA'; planoPetMais = $true }
-    @{ pet = 'Nina'; tipo = 'CIRURGIA'; planoPetMais = $false }
-)
-$exemplos | ForEach-Object {
-    $dados = $_ + @{
-        tutor = 'Maria Silva'
-        telefone = '11912345678'
-        dataHora = [DateTime]::UtcNow.AddDays(2).ToString('o')
-    }
-    Invoke-RestMethod $url -Method Post -ContentType 'application/json' -Body ($dados | ConvertTo-Json)
-} | Select-Object id, pet, tipo, planoPetMais, valor
-```
-
-Em uma instância nova, os IDs são 1, 2 e 3 e os valores são R$ 120, R$ 64 e
-R$ 540. Os dados da demonstração são de exemplo.
+`npm run dev` agenda três exemplos e exibe os avisos simulados: consulta
+de R$ 120, vacina com Pet+ de R$ 64 e banho e tosa de R$ 65. Confira os IDs
+1, 2 e 3 em `GET /consultas`. O servidor compilado e o contêiner iniciam
+com a lista vazia.
 
 Os preços-base são R$ 120 para `CONSULTA`, R$ 80 para `VACINA`, R$ 540
 para `CIRURGIA` e R$ 65 para `BANHO_TOSA`. O Pet+ reduz o preço em 20% e
@@ -74,10 +58,11 @@ npm test
 npm run test:coverage
 ```
 
-A compilação passou e foram aprovados **39 testes em 3 suítes**. A cobertura
-foi de 95,00% das instruções, 92,53% das ramificações, 95,91% das funções e
-94,73% das linhas. As pastas `pricing` e `facade` atingiram 100% de
-ramificações cada. O relatório HTML fica em `coverage/lcov-report/index.html`.
+A compilação passou e foram aprovados **41 testes em 3 suítes**. A cobertura
+foi de 81,93% das instruções, 78,75% das ramificações, 92,15% das funções e
+84,61% das linhas. A cobertura de ramificações foi de 92,30% em `pricing` e
+100% em `facade`, acima da meta de 80% em ambas. O relatório HTML fica em
+`coverage/lcov-report/index.html`.
 
 ## Docker
 
@@ -88,21 +73,18 @@ docker build -t vetunix .
 docker run --rm -p 3000:3000 vetunix
 ```
 
-A imagem revisada foi validada no Docker Engine 29.9.3. Os três agendamentos
-retornaram HTTP 201. Status, listagem, busca e cancelamento retornaram HTTP
-200. O contêiner de teste foi encerrado e removido.
+A imagem revisada foi construída no Docker Engine 29.9.3. O teste HTTP em
+contêiner confirmou o agendamento com data ISO sem fuso, a listagem, a busca
+por ID, o cancelamento e o aviso simulado. O contêiner de teste foi removido.
 
 ## Conceitos aplicados e desenvolvimento
 
-O projeto aplica Clean Code, SOLID, Adapter, Decorator e Facade. A Facade
-recebe as dependências no construtor. As regras de preço são classes
-independentes, o Decorator aplica o desconto Pet+ e o Adapter conecta o
-notificador à simulação de WhatsApp. Os testes usam mocks e Supertest.
-
-Os documentos originais do professor não estavam disponíveis nesta revisão.
-A conferência literal dos contratos de preço, repositório e Decorator, do
-legado, do SDK e dos dados da demonstração depende desses documentos. O legado
-e o SDK foram preservados.
+O projeto aplica Clean Code, SOLID, Adapter, Decorator e Facade.
+`montarFacade` conecta o repositório em memória, a calculadora de preços e
+o notificador à Facade. A calculadora seleciona uma regra pelo tipo e usa
+`DescontoPlanoPet` para decorar essa regra. `ZapAdapter` traduz a chamada
+para `ZapLegacySDK.dispararMsg`. O legado e o SDK vieram do roteiro da
+Parte 1. Os testes usam mocks e Supertest.
 
 O estudante informou que o professor autorizou o uso de IA. O Codex auxiliou
 na implementação, nos testes e nas verificações. Os commits identificam seus
